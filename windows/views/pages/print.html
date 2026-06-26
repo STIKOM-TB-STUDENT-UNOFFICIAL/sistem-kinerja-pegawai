@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laporan Aktivitas Pegawai</title>
+    <style>
+        /* ========== BASE ========== */
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            background-color: #f0f0f0;
+            padding: 20px;
+            margin: 0;
+            color: #000;
+        }
+
+        .print-container {
+            max-width: 210mm;
+            margin: 0 auto;
+            background: white;
+            padding: 20mm 20mm 15mm 25mm; /* margin kiri lebih lebar (jilid) */
+            box-shadow: 0 2px 16px rgba(0,0,0,0.15);
+        }
+
+        /* ========== KOP SURAT ========== */
+        .kop-surat {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            border-bottom: 3px double #000;
+            padding-bottom: 10px;
+            margin-bottom: 12px;
+        }
+
+        .kop-logo-placeholder {
+            width: 75px;
+            height: 75px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 9px;
+            font-weight: bold;
+            text-align: center;
+            color: #000;
+            line-height: 1.2;
+        }
+
+        /* Teks center di sisa ruang; padding-right = lebar logo agar optically centered */
+        .kop-text {
+            flex: 1;
+            text-align: center;
+            padding-right: 75px;
+        }
+
+        .kop-instansi-atasan {
+            font-size: 11px;
+            font-weight: normal;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 1px;
+        }
+
+        .kop-instansi-utama {
+            font-size: 18px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+
+        .kop-alamat {
+            font-size: 10px;
+            margin-bottom: 1px;
+        }
+
+        /* ========== HEADER LAPORAN ========== */
+        .print-header {
+            text-align: center;
+            margin: 14px 0 10px 0;
+        }
+
+        .print-header h1 {
+            margin: 0 0 4px 0;
+            font-size: 13px;
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 1.5px;
+        }
+
+        .print-header .header-underline {
+            width: 60%;
+            margin: 4px auto;
+            border: none;
+            border-top: 1px solid #000;
+        }
+
+        .print-header p {
+            margin: 4px 0 0 0;
+            font-size: 11px;
+        }
+
+        /* ========== NOMOR & TANGGAL SURAT ========== */
+        .surat-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            margin-bottom: 14px;
+            border-top: 1px solid #000;
+            border-bottom: 1px solid #000;
+            padding: 5px 0;
+        }
+
+        /* ========== SECTION TITLE ========== */
+        .section-title {
+            font-size: 10.5px;
+            font-weight: bold;
+            color: #000;
+            margin-top: 16px;
+            margin-bottom: 8px;
+            padding: 3px 6px;
+            background: #000;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            /* Cegah section title terpotong dari konten di bawahnya */
+            break-after: avoid;
+            page-break-after: avoid;
+        }
+
+        /* ========== CARD GRID ========== */
+        .card-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+            margin-bottom: 14px;
+            /* Jaga agar card tidak terpotong */
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+
+        .card-grid-2col {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        /* ========== USER CARD ========== */
+        .user-card {
+            border: 1px solid #000;
+            padding: 10px 12px;
+            background: white;
+            /* Cegah card terpotong antar halaman */
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+
+        .user-card h3 {
+            margin: 0 0 7px 0;
+            font-size: 11px;
+            color: #000;
+            border-bottom: 1px solid #999;
+            padding-bottom: 5px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .user-card-row {
+            display: flex;
+            margin-bottom: 4px;
+            font-size: 10.5px;
+            align-items: baseline;
+        }
+
+        .user-card-label {
+            font-weight: bold;
+            min-width: 110px;
+            color: #000;
+        }
+
+        .user-card-colon {
+            margin-right: 6px;
+        }
+
+        .user-card-value {
+            flex: 1;
+            color: #000;
+            word-break: break-word;
+        }
+
+        /* ========== STATISTIK CARD ========== */
+        .stats-card {
+            border: 1px solid #000;
+            padding: 10px 12px;
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+
+        .stats-card-row {
+            display: flex;
+            margin-bottom: 4px;
+            font-size: 10.5px;
+        }
+
+        .stats-card-label {
+            font-weight: bold;
+            min-width: 150px;
+        }
+
+        .stats-card-colon {
+            margin-right: 6px;
+        }
+
+        /* ========== TABLE ========== */
+        .table-wrapper {
+            margin-bottom: 14px;
+        }
+
+        /* Blok tabel (header + baris pertama) jangan terpotong */
+        .table-wrapper table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10px;
+            font-family: 'Times New Roman', Times, serif;
+            color: #000;
+        }
+
+        .table-wrapper table thead {
+            background-color: #e8e8e8;
+            /* Cegah header tabel terpotong dari baris pertama */
+            display: table-header-group;
+        }
+
+        .table-wrapper table th {
+            padding: 5px 6px;
+            text-align: left;
+            font-weight: bold;
+            border: 1px solid #000;
+            background: #e8e8e8;
+        }
+
+        .table-wrapper table td {
+            padding: 5px 6px;
+            border: 1px solid #000;
+            vertical-align: top;
+        }
+
+        /* Cegah baris terpotong (berlaku untuk setiap baris) */
+        .table-wrapper table tr {
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+
+        .table-wrapper table tbody tr:nth-child(even) td {
+            background: #fafafa;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 2px 5px;
+            font-size: 9px;
+            font-weight: bold;
+            border: 1px solid #000;
+            text-transform: uppercase;
+        }
+
+        /* ========== TANDA TANGAN ========== */
+        .ttd-section {
+            margin-top: 20px;
+            display: flex;
+            justify-content: flex-end;
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+
+        .ttd-box {
+            width: 200px;
+            text-align: center;
+            font-size: 10.5px;
+        }
+
+        .ttd-box .ttd-kota-tanggal {
+            margin-bottom: 4px;
+        }
+
+        .ttd-box .ttd-jabatan {
+            font-weight: bold;
+            margin-bottom: 60px; /* ruang tanda tangan */
+        }
+
+        .ttd-box .ttd-nama {
+            font-weight: bold;
+            border-top: 1px solid #000;
+            padding-top: 4px;
+        }
+
+        .ttd-box .ttd-nip {
+            font-size: 10px;
+        }
+
+        /* ========== FOOTER ========== */
+        .print-footer {
+            margin-top: 16px;
+            border-top: 1px solid #aaa;
+            padding-top: 6px;
+            text-align: center;
+            font-size: 9px;
+            color: #555;
+        }
+
+        /* ========== TOMBOL CETAK ========== */
+        .btn-print {
+            display: inline-block;
+            padding: 7px 18px;
+            background-color: #1a1a1a;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 11px;
+            margin-bottom: 16px;
+            font-family: Arial, sans-serif;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-print:hover {
+            background-color: #333;
+        }
+
+        /* ========== PRINT MEDIA ========== */
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+
+            .print-container {
+                max-width: 100%;
+                box-shadow: none;
+                padding: 10mm 15mm 10mm 20mm;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+
+            /* Pastikan section title tidak terpotong dari kontennya */
+            .section-title {
+                break-after: avoid;
+                page-break-after: avoid;
+            }
+
+            /* Cegah card terpotong */
+            .card-grid,
+            .user-card,
+            .stats-card,
+            .ttd-section {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+
+            /* Header tabel tampil di setiap halaman baru */
+            thead {
+                display: table-header-group;
+            }
+
+            /* Cegah baris tabel terpotong */
+            tr {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+
+            /* Pastikan section baru tidak memulai di sisi bawah halaman yang sempit */
+            .section-block {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+
+            .print-footer {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+        }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 768px) {
+            .print-container {
+                padding: 15px;
+            }
+
+            .card-grid-2col {
+                grid-template-columns: 1fr;
+            }
+
+        }
+    </style>
+</head>
+<body onload="window.print();window.onafterprint = function() {window.close();};">
+    <div class="print-container">
+
+        <!-- ===== KOP SURAT ===== -->
+        <div class="kop-surat">
+            <div class="kop-logo-placeholder">
+                <img src="/assets/images/logo.png" alt="logo" style="width:80px">
+            </div>
+            <div class="kop-text">
+                <div class="kop-instansi-atasan">Kementerian Pendidikan dan Kebudayaan</div>
+                <div class="kop-instansi-utama">STIKOM Tunas Bangsa</div>
+                <div class="kop-alamat">Jl. Kartini, Proklamasi, Kec. Siantar Bar., Kota Pematang Siantar, Sumatera Utara 21143</div>
+                <div class="kop-alamat">Telp. (0622) 22431 &nbsp;|&nbsp; Email: admin@stikomtunasbangsa.ac.id</div>
+            </div>
+        </div>
+
+        <!-- ===== HEADER LAPORAN ===== -->
+        <div class="print-header">
+            <h1>Laporan Aktivitas Pegawai</h1>
+            <hr class="header-underline">
+            <p>Periode: {{.Periode}}</p>
+        </div>
+
+        <!-- ===== DATA PENGGUNA ===== -->
+        <div class="section-block">
+            <div class="section-title">Data Pegawai</div>
+            <div class="card-grid">
+                <div class="user-card">
+                    <h3>{{.Pengguna.NamaLengkap}}</h3>
+                    <div class="user-card-row">
+                        <div class="user-card-label">User ID</div>
+                        <div class="user-card-colon">:</div>
+                        <div class="user-card-value">{{.Pengguna.UserId}}</div>
+                    </div>
+                    <div class="user-card-row">
+                        <div class="user-card-label">NIP</div>
+                        <div class="user-card-colon">:</div>
+                        <div class="user-card-value">{{.Pengguna.NIP}}</div>
+                    </div>
+                    <div class="user-card-row">
+                        <div class="user-card-label">Nama Lengkap</div>
+                        <div class="user-card-colon">:</div>
+                        <div class="user-card-value">{{.Pengguna.NamaLengkap}}</div>
+                    </div>
+                    <div class="user-card-row">
+                        <div class="user-card-label">Jabatan</div>
+                        <div class="user-card-colon">:</div>
+                        <div class="user-card-value">{{.Pengguna.Jabatan}}</div>
+                    </div>
+                    <div class="user-card-row">
+                        <div class="user-card-label">Departemen</div>
+                        <div class="user-card-colon">:</div>
+                        <div class="user-card-value">{{.Pengguna.Departemen}}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== STATISTIK AKTIVITAS ===== -->
+        <div class="section-block">
+            <div class="section-title">Statistik Aktivitas</div>
+            <div class="stats-card">
+                <div class="stats-card-row">
+                    <div class="stats-card-label">Periode</div>
+                    <div class="stats-card-colon">:</div>
+                    <div>{{.Periode}}</div>
+                </div>
+                <div class="stats-card-row">
+                    <div class="stats-card-label">Total Aktivitas</div>
+                    <div class="stats-card-colon">:</div>
+                    <div>{{.TotalAktivitas}}</div>
+                </div>
+                <div class="stats-card-row">
+                    <div class="stats-card-label">Rata-rata Waktu Penyelesaian</div>
+                    <div class="stats-card-colon">:</div>
+                    <div>{{.AverageCompletionTime}}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== DATA ATASAN ===== -->
+        <div class="section-block">
+            <div class="section-title">Data Atasan</div>
+            <div class="card-grid card-grid-2col">
+                {{range .Atasan}}
+                <div class="user-card">
+                    <h3>{{.NamaLengkap}}</h3>
+                    <div class="user-card-row">
+                        <div class="user-card-label">User ID</div>
+                        <div class="user-card-colon">:</div>
+                        <div class="user-card-value">{{.UserId}}</div>
+                    </div>
+                    <div class="user-card-row">
+                        <div class="user-card-label">NIP</div>
+                        <div class="user-card-colon">:</div>
+                        <div class="user-card-value">{{.NIP}}</div>
+                    </div>
+                    <div class="user-card-row">
+                        <div class="user-card-label">Nama Lengkap</div>
+                        <div class="user-card-colon">:</div>
+                        <div class="user-card-value">{{.NamaLengkap}}</div>
+                    </div>
+                    <div class="user-card-row">
+                        <div class="user-card-label">Jabatan</div>
+                        <div class="user-card-colon">:</div>
+                        <div class="user-card-value">{{.Jabatan}}</div>
+                    </div>
+                    <div class="user-card-row">
+                        <div class="user-card-label">Departemen</div>
+                        <div class="user-card-colon">:</div>
+                        <div class="user-card-value">{{.Departemen}}</div>
+                    </div>
+                </div>
+                {{end}}
+            </div>
+        </div>
+
+        <!-- ===== DAFTAR AKTIVITAS ===== -->
+        <div class="section-block">
+            <div class="section-title">Daftar Aktivitas</div>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 4%; text-align: center;">No</th>
+                            <th style="width: 11%;">Tanggal</th>
+                            <th style="width: 15%;">Tupoksi</th>
+                            <th style="width: 25%;">Deskripsi</th>
+                            <th style="width: 20%;">Catatan</th>
+                            <th style="width: 15%">Waktu Pengerjaan</th>
+                            <th style="width: 10%; text-align: center;">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{range $i, $aktivitas := .Aktivitas}}
+                        <tr>
+                            <td style="text-align: center;">{{add $i 1}}</td>
+                            <td>{{$aktivitas.Tanggal}}</td>
+                            <td>{{$aktivitas.Nama}}</td>
+                            <td>{{$aktivitas.Deskripsi}}</td>
+                            <td>{{$aktivitas.Catatan}}</td>
+                            <td>{{$aktivitas.WaktuPengerjaan}}</td>
+                            <td style="text-align: center;">
+                                <span class="status-badge">{{$aktivitas.Status}}</span>
+                            </td>
+                        </tr>
+                        {{end}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ===== TANDA TANGAN ===== -->
+        <div class="ttd-section">
+            <div class="ttd-box">
+                <div class="ttd-kota-tanggal">Pematangsiantar, {{.PrintDate}}</div>
+                <div class="ttd-jabatan">Mengetahui,<br>Kepala Departemen</div>
+                <div class="ttd-nama">( ________________________ )</div>
+                <div class="ttd-nip">NIP. ______________________</div>
+            </div>
+        </div>
+
+        <!-- ===== FOOTER ===== -->
+        <div class="print-footer">
+            Dokumen ini dicetak secara otomatis pada {{.PrintDate}} &mdash; Rahasia / Untuk Kalangan Sendiri
+        </div>
+
+    </div>
+</body>
+</html>

@@ -1,0 +1,229 @@
+<section class="section">
+    <div class="row">
+        <div class="col">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">Daftar Tupoksi</h4>
+                </div>
+                <div class="card-content">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <form
+                                action="/dashboard/tupoksi"
+                                class="d-flex gap-1"
+                            >
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    placeholder="Cari"
+                                    name="q"
+                                />
+                                <input
+                                    type="hidden"
+                                    name="page"
+                                    value="{{.Page}}"
+                                />
+                                <button type="submit" class="btn btn-primary">
+                                    <span class="bi bi-search"></span>
+                                </button>
+                            </form>
+                            <button
+                                class="btn btn-success"
+                                data-bs-toggle="modal"
+                                data-bs-target="#tambah-tupoksi"
+                            >
+                                <span class="bi bi-database-add"></span>
+                            </button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-lg">
+                                <thead>
+                                    <tr>
+                                        <th>No</th>
+                                        <th>Nama</th>
+                                        <th>Deskripsi</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {{range $i, $tupoksi := .Result}}
+                                    <tr>
+                                        <td class="text-bold-500">{{add (add $i 1) $.Offset}}</td>
+                                        <td class="text-bold-500">
+                                            {{$tupoksi.Nama}}
+                                        </td>
+                                        <td class="text-bold-500">
+                                            {{$tupoksi.Deskripsi}}
+                                        </td>
+                                        <td class="text-bold-500">
+                                            <button class="btn btn-primary" onClick="edit('{{$tupoksi.Id}}', '{{$tupoksi.Nama}}', '{{$tupoksi.Deskripsi}}')">
+                                                <span class="bi bi-pen"></span>
+                                            </button>
+                                            <button class="btn btn-danger" onClick="hapus('{{$tupoksi.Id}}')">
+                                                <span
+                                                    class="bi bi-trash"
+                                                ></span>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {{end}}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="d-flex justify-content-center gap-1">
+                            {{if lte .Page 1}} {{else}}
+                            <a
+                                class="btn btn-secondary"
+                                href="/dashboard/tupoksi?q={{.Query}}&page={{.Previous}}"
+                                >Previous</a
+                            >
+                            {{end}}
+                            <button class="btn btn-primary">{{.Page}}</button>
+                            {{if .HasNext}}
+                            <a
+                                class="btn btn-secondary"
+                                href="/dashboard/tupoksi?q={{.Query}}&page={{.Next}}"
+                                >Next</a
+                            >
+                            {{end}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="tambah-tupoksi">
+        <div class="modal-dialog" role="document">
+            <form action="/dashboard/tupoksi/post" method="post">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5">Tambah Tupoksi</h1>
+                        <button
+                            type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"
+                        ></button>
+                    </div>
+                    <div class="modal-body">
+                        <label for="nama-tupoksi" class="form-label"
+                            >Nama Tupoksi</label
+                        >
+                        <input type="text" name="nama" id="nama-tupoksi" class="form-control">
+                        <label for="deskripsi">Deskripsi</label>
+                        <textarea
+                            rows="10"
+                            class="form-control"
+                            id="deskripsi"
+                            name="deskripsi"
+                        ></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button
+                            type="button"
+                            class="btn btn-danger"
+                            data-bs-dismiss="modal"
+                        >
+                            Batal
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            Simpan
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="modal fade" id="hapus-tupoksi">
+        <div class="modal-dialog" role="document">
+            <form action="/dashboard/tupoksi/delete" method="post">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5">Hapus Tupoksi</h1>
+                        <button
+                            type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"
+                        ></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="id" id="hapus-aktivitas-id">
+                        <h6>Yakin ingin menghapus tupoksi ini ?</h6>
+                    </div>
+                    <div class="modal-footer">
+                        <button
+                            type="button"
+                            class="btn btn-danger"
+                            data-bs-dismiss="modal"
+                        >
+                            Batal
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            Lanjut
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="modal fade" id="edit-tupoksi">
+        <div class="modal-dialog" role="document">
+            <form action="/dashboard/tupoksi/update" method="post">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5">Edit Tupoksi</h1>
+                        <button
+                            type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"
+                        ></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="id" id="edit-id-tupoksi">
+                        <label for="nama-tupoksi" class="form-label"
+                            >Nama Tupoksi</label
+                        >
+                        <input type="text" name="nama" id="edit-nama-tupoksi" class="form-control">
+                        <label for="deskripsi">Deskripsi</label>
+                        <textarea
+                            rows="10"
+                            class="form-control"
+                            id="edit-deskripsi"
+                            name="deskripsi"
+                        ></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button
+                            type="button"
+                            class="btn btn-danger"
+                            data-bs-dismiss="modal"
+                        >
+                            Batal
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            Simpan
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script type="text/javascript">
+        function edit(idtupoksi, nama, deskripsi){
+            document.getElementById("edit-id-tupoksi").value = idtupoksi;
+            document.getElementById("edit-nama-tupoksi").value = nama;
+            document.getElementById("edit-deskripsi").innerHTML = deskripsi
+
+            const modal = new bootstrap.Modal(document.getElementById("edit-tupoksi"))
+            modal.show()
+        }
+
+        function hapus(id){
+            document.getElementById("hapus-aktivitas-id").value = id
+            const modal = new bootstrap.Modal(document.getElementById("hapus-tupoksi"))
+            modal.show()
+        }
+    </script>
+</section>

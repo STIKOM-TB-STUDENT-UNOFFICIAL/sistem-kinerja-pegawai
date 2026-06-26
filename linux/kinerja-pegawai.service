@@ -1,0 +1,19 @@
+[Unit]
+Description=Sistem Kinerja Pegawai
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+
+WorkingDirectory=/opt/kinerja-pegawai
+ExecStart=/opt/kinerja-pegawai/main
+
+Restart=always
+RestartSec=5
+
+Environment=GIN_MODE=release
+
+[Install]
+WantedBy=multi-user.target

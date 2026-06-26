@@ -1,0 +1,12 @@
+services:
+  app:
+    container_name: "Sistem_Kinerja_Pegawai"
+    build: 
+      context: .
+    restart: unless-stopped
+
+    ports:
+      - "1010:3000"
+    
+    volumes:
+      - /mnt/kinerja_pegawai:/app/public/uploads

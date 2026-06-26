@@ -1,0 +1,279 @@
+<section class="section">
+    <div class="row">
+        <div class="col">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">Daftar Pengguna</h4>
+                </div>
+                <div class="card-content">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <form
+                                action="/dashboard/{{.Level}}/pengguna"
+                                class="d-flex gap-1"
+                            >
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    placeholder="Cari"
+                                    name="q"
+                                />
+                                <input
+                                    type="hidden"
+                                    name="page"
+                                    value="{{.Page}}"
+                                />
+                                <button type="submit" class="btn btn-primary">
+                                    <span class="bi bi-search"></span>
+                                </button>
+                            </form>
+                            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#tambah-pengguna">
+                                <span class="bi bi-database-add"></span>
+                            </button>
+                        </div>
+                        <div class="table-responsive mt-2">
+                            <table class="table table-xl">
+                                <thead>
+                                    <tr>
+                                        <th>No</th>
+                                        <th>User Id</th>
+                                        <th>Level</th>
+                                        <th>NIP</th>
+                                        <th>Nama Lengkap</th>
+                                        <th>Jabatan</th>
+                                        <th>Departemen</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                   {{range $i, $pengguna := .User}}
+                                   <tr>
+                                        <td>{{add (add $i 1) $.Offset}}</td>
+                                        <td>{{$pengguna.UserId}}</td>
+                                        <td>{{$pengguna.Level}}</td>
+                                        <td>
+                                            {{if eq $pengguna.Nip nil}}
+                                            -
+                                            {{else}}
+                                            {{$pengguna.Nip}}
+                                            {{end}}
+                                        </td>
+                                        <td>
+                                            {{$pengguna.NamaLengkap}}
+                                        </td>
+                                        <td>
+                                            {{if eq $pengguna.Jabatan nil}}
+                                            -
+                                            {{else}}
+                                            {{$pengguna.Jabatan}}
+                                            {{end}}
+                                        </td>
+                                        <td>
+                                            {{if eq $pengguna.Departemen nil}}
+                                            -
+                                            {{else}}
+                                            {{$pengguna.Departemen}}
+                                            {{end}}
+                                        </td>
+                                        <td>
+                                            <a href="/dashboard/admin/pengguna/{{$pengguna.UserId}}" class="btn btn-success">
+                                                <span class="bi bi-eye"></span>
+                                            </a>
+                                            <button class="btn btn-primary" 
+                                                onclick="edit('{{$pengguna.UserId}}', '{{$pengguna.Level}}',
+                                                '{{if eq $pengguna.Nip nil}}{{else}}{{$pengguna.Nip}}{{end}}', 
+                                                '{{$pengguna.NamaLengkap}}', 
+                                                '{{if eq $pengguna.Jabatan nil}}{{else}}{{$pengguna.Jabatan}}{{end}}', 
+                                                '{{if eq $pengguna.Departemen nil}}{{else}}{{$pengguna.Departemen}}{{end}}')"
+                                            >
+                                                <span class="bi bi-pen"></span>
+                                            </button>
+                                            <button class="btn btn-danger" onclick="hapus('{{$pengguna.UserId}}')">
+                                                <span class="bi bi-trash"></span>
+                                            </button>
+                                        </td>
+                                   </tr>
+                                   {{end}}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="d-flex justify-content-center gap-1">
+                            {{if lte .Page 1}} {{else}}
+                            <a
+                                class="btn btn-secondary"
+                                href="/dashboard/{{.Level}}/pengguna?q={{.Query}}&page={{.Previous}}"
+                                >Previous</a
+                            >
+                            {{end}}
+                            <button class="btn btn-primary">{{.Page}}</button>
+                            {{if .HasNext}}
+                            <a
+                                class="btn btn-secondary"
+                                href="/dashboard/{{.Level}}/pengguna?q={{.Query}}&page={{.Next}}"
+                                >Next</a
+                            >
+                            {{end}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="tambah-pengguna">
+        <div class="modal-dialog" role="document">
+            <form action="/dashboard/admin/pengguna/post" method="post">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="title-p">Tambah Pengguna</h1>
+                        <button
+                            type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"
+                        ></button>
+                    </div>
+                    <div class="modal-body">
+                        <label for="userid" class="form-label">User Id</label>
+                        <input type="text" class="form-control mb-2" placeholder="User Id" id="userid" name="userid" required>
+                        <label for="level" class="form-label">Level</label>
+                        <select name="level" class="form-control mb-2" id="level" required>
+                            <option value="">Pilih Level</option>
+                            <option value="dosen">Dosen</option>
+                            <option value="pegawai">Pegawai</option>
+                        </select>
+                        <label for="nip" class="form-label">NIP</label>
+                        <input type="text" class="form-control mb-2" placeholder="NIP" id="nip" name="nip" required>
+                        <label for="nama_lengkap" class="form-label">Nama Lengkap</label>
+                        <input type="text" class="form-control mb-2" placeholder="Nama Lengkap" id="nama_lengkap" name="nama_lengkap" required>
+                        <label for="jabatan" class="form-label">Jabatan</label>
+                        <input type="text" class="form-control mb-2" placeholder="Jabatan" id="jabatan" name="jabatan" required>
+                        <label for="departemen" class="form-label">Departemen</label>
+                        <input type="text" class="form-control mb-2" placeholder="Departemen" id="departemen" name="departemen" required>
+                    </div>
+                    <div class="modal-footer">
+                        <button
+                            type="button"
+                            class="btn btn-danger"
+                            data-bs-dismiss="modal"
+                        >
+                            Batal
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            Simpan
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="modal fade" id="edit-pengguna">
+        <div class="modal-dialog" role="document">
+            <form action="/dashboard/admin/pengguna/update" method="post">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="title-p">Edit Pengguna</h1>
+                        <button
+                            type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"
+                        ></button>
+                    </div>
+                    <div class="modal-body">
+                        <label for="edit_userid" class="form-label">User Id</label>
+                        <input type="text" class="form-control mb-2" placeholder="User Id" id="edit_userid" name="userid" required readonly>
+                        <label for="edit_level" class="form-label">Level</label>
+                        <select name="level" class="form-control mb-2" id="edit_level" required>
+                            <option value="">Pilih Level</option>
+                            <option value="dosen">Dosen</option>
+                            <option value="pegawai">Pegawai</option>
+                        </select>
+                        <label for="edit_nip" class="form-label">NIP</label>
+                        <input type="text" class="form-control mb-2" placeholder="NIP" id="edit_nip" name="nip" required>
+                        <label for="edit_nama_lengkap" class="form-label">Nama Lengkap</label>
+                        <input type="text" class="form-control mb-2" placeholder="Nama Lengkap" id="edit_nama_lengkap" name="nama_lengkap" required>
+                        <label for="edit_jabatan" class="form-label">Jabatan</label>
+                        <input type="text" class="form-control mb-2" placeholder="Jabatan" id="edit_jabatan" name="jabatan" required>
+                        <label for="edit_departemen" class="form-label">Departemen</label>
+                        <input type="text" class="form-control mb-2" placeholder="Departemen" id="edit_departemen" name="departemen" required>
+                    </div>
+                    <div class="modal-footer">
+                        <button
+                            type="button"
+                            class="btn btn-danger"
+                            data-bs-dismiss="modal"
+                        >
+                            Batal
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            Simpan
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="modal fade" id="hapus-pengguna">
+        <div class="modal-dialog" role="document">
+            <form action="/dashboard/admin/pengguna/delete" method="post">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="title-p">Hapus Pengguna</h1>
+                        <button
+                            type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"
+                        ></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" class="form-control mb-2" id="hapus_userid" name="userid">
+                        <h6>Apakah anda yakin ingin menghapus pengguna berikut ?</h6>
+                        <p>Tindakan ini akan menghapus seluruh riwayat serta relasi atasan dan anggota</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button
+                            type="button"
+                            class="btn btn-danger"
+                            data-bs-dismiss="modal"
+                        >
+                            Batal
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            Simpan
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script type="text/javascript">
+        function edit(userid, level, nip, namaLengkap, jabatan, departemen){
+            document.getElementById("edit_userid").value = userid;
+            document.getElementById("edit_nip").value = nip;
+            document.getElementById("edit_nama_lengkap").value = namaLengkap;
+            document.getElementById("edit_jabatan").value = jabatan;
+            document.getElementById("edit_departemen").value = departemen;
+            
+            const options = document.getElementById("edit_level").getElementsByTagName("option")
+
+            for(let i = 0; i < options.length; i++){
+                options[i].removeAttribute("selected")
+
+                if(level == options[i].value){
+                    options[i].setAttribute("selected", true)
+                }
+            }
+
+            const modal = new bootstrap.Modal(document.getElementById("edit-pengguna"))
+            modal.show()
+        }
+
+        function hapus(userid) {
+            document.getElementById("hapus_userid").value = userid;
+
+            const modal = new bootstrap.Modal(document.getElementById("hapus-pengguna"))
+            modal.show()
+        }
+    </script>
+</section>

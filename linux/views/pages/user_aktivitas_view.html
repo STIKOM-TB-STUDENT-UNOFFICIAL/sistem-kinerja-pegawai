@@ -1,0 +1,244 @@
+<section class="section">
+    <div class="row">
+        <div class="col-12 col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">Detail Aktivitas</h4>
+                </div>
+                <div class="card-content">
+                    <div class="card-body">
+                        <table class="table table-borderless">
+                            <tr>
+                                <th style="width:180px">Tanggal</th>
+                                <td>{{.Aktivitas.Tanggal}}</td>
+                            </tr>
+                            <tr>
+                                <th>Tupoksi</th>
+                                <td>{{.Aktivitas.Nama}}</td>
+                            </tr>
+                            <tr>
+                                <th>Deskripsi</th>
+                                <td>{{.Aktivitas.Deskripsi}}</td>
+                            </tr>
+                            <tr>
+                                <th>Catatan</th>
+                                <td>{{.Aktivitas.Catatan}}</td>
+                            </tr>
+                            <tr>
+                                <th>Status</th>
+                                <td>{{.Aktivitas.Status}}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between">
+                        <h4 class="card-title">Bukti Aktivitas</h4>
+                        {{if eq $.AnggotaView false}}
+                        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#tambah-file">
+                            <span class="bi bi-database-add"></span>
+                        </button>
+                        {{end}}
+                    </div>
+                </div>
+                <div class="card-content">
+                    <div class="card-body">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Nama File</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{if gt .FileBuktiLength 0}}
+                                {{range .FileBukti}}
+                                    <tr>
+                                        <td>
+                                            {{.NamaFile}}
+                                        </td>
+                                        <td>
+                                            <a class="btn btn-success" href="{{.LokasiFile}}" target="_blank">
+                                                <span class="bi bi-download"></span>
+                                            </a>
+                                            {{if eq $.AnggotaView false}}
+                                            <button class="btn btn-danger" onclick="hapus('{{.Id}}')">
+                                                <span class="bi bi-trash"></span>
+                                            </button>
+                                            {{end}}
+                                        </td>
+                                    </tr>
+                                {{end}}
+                                {{else}}
+                                    <tr>
+                                        <td class="text-center" {{if eq $.AnggotaView false}}colspan="2"{{end}}>
+                                            Tidak ada file
+                                        </td>
+                                    </tr>
+                                {{end}}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-4">
+            <div class="card">
+                <div class="card-content">
+                    <div class="card-body">
+                        <h4 class="card-title">Komentar</h4>
+                        {{if .Komentar}}
+                        <div class="list-group list-group-flush">
+                            {{range $i, $k := .Komentar}}
+                            <div class="list-group-item py-3">
+                                <div class="d-flex align-items-start gap-3">
+                                    <div class="me-2">
+                                        <span class="bi bi-person-circle fs-3"></span>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex justify-content-between">
+                                            <div class="fw-bold">{{if $k.NamaLengkap}}{{$k.NamaLengkap}}{{else}}Pengguna{{end}}</div>
+                                            {{if eq $.UserId $k.UserId}}
+                                                <button class="btn btn-danger" onClick="hapusKomentar('{{$k.IdKomentar}}')">
+                                                    <span class="bi bi-trash"></span>
+                                                </button>
+                                            {{end}}
+                                        </div>
+                                        <div class="small text-muted mt-1">{{if $k.Komentar}}{{$k.Komentar}}{{end}}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            {{end}}
+                        </div>
+                        {{else}}
+                        <p class="text-muted">Belum ada komentar.</p>
+                        {{end}}
+                        <form
+                            {{if .AnggotaView}}
+                                action="/dashboard/anggota/{{.Anggota}}/{{.Aktivitas.Id}}/post_komentar"
+                            {{else}}
+                                action="/dashboard/aktivitas/{{.Aktivitas.Id}}/post_komentar"
+                            {{end}}
+                                method="post" class="mt-3">
+                            <div class="mb-2">
+                                <textarea name="komentar" rows="3" class="form-control" placeholder="Tulis komentar..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Kirim Komentar</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" tabindex="-1" role="dialog" id="hapus-komentar">
+        <div class="modal-dialog">
+            <form
+                {{if .AnggotaView}}
+                    action="/dashboard/anggota/{{.Anggota}}/{{.Aktivitas.Id}}/hapus_komentar"
+                {{else}}
+                    action="/dashboard/aktivitas/{{.Aktivitas.Id}}/hapus_komentar"
+                {{end}} 
+                method="post"
+            >
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Hapus Komentar</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="id_komentar" id="hapus-id-komentar">
+                        <h6>Yakin ingin menghapus komentar ini ?</h6>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-danger" data-bs-dismiss="modal" type="button">
+                            Batal
+                        </button>
+                        <button class="btn btn-primary" type="submit">
+                            Lanjut
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {{if eq .AnggotaView false}}
+    <div class="modal fade" tabindex="-1" role="dialog" id="hapus-file">
+        <div class="modal-dialog">
+            <form action="/dashboard/aktivitas/{{.Aktivitas.Id}}/hapus" method="post">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Hapus File</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="id_file" id="hapus-id-file">
+                        <h6>Yakin ingin menghapus file ini ?</h6>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-danger" data-bs-dismiss="modal" type="button">
+                            Batal
+                        </button>
+                        <button class="btn btn-primary" type="submit">
+                            Lanjut
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="modal fade" tabindex="-1" role="dialog" id="tambah-file">
+        <div class="modal-dialog">
+            <form action="/dashboard/aktivitas/{{.Aktivitas.Id}}/post" method="post" enctype="multipart/form-data">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Tambah File</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <label for="input-file">File</label>
+                        <input type="file" name="file" id="input-file" class="form-control" multiple>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-danger" data-bs-dismiss="modal" type="button">
+                            Batal
+                        </button>
+                        <button class="btn btn-primary" type="submit">
+                            Lanjut
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    {{end}}
+
+    <div class="row mt-3">
+        <div class="col-12">
+            {{if .AnggotaView}}
+                <a href="/dashboard/anggota/{{.Anggota}}" class="btn btn-secondary">Kembali</a>
+            {{else}}
+                <a href="/dashboard/aktivitas" class="btn btn-secondary">Kembali</a>
+            {{end}}
+        </div>
+    </div>
+    <script>
+        function hapus(idFile){
+            document.getElementById("hapus-id-file").value = idFile
+
+            const Modal = new bootstrap.Modal(document.getElementById("hapus-file"))
+            Modal.show()
+        }
+
+        function hapusKomentar(idKomentar){
+            document.getElementById("hapus-id-komentar").value = idKomentar
+
+            const Modal = new bootstrap.Modal(document.getElementById("hapus-komentar"))
+            Modal.show()
+        }
+    </script>
+</section>

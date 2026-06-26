@@ -1,0 +1,291 @@
+<section class="section">
+    <div class="row">
+        <div class="col">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">Daftar Aktivitas</h4>
+                </div>
+                <div class="card-content">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <form
+                                action="/dashboard/aktivitas"
+                                class="d-flex gap-2 w-50"
+                            >
+                                <input
+                                    type="text"
+                                    class="form-control w-"
+                                    placeholder="Cari"
+                                    name="q"
+                                />
+                                <input
+                                    type="hidden"
+                                    name="page"
+                                    value="{{.Page}}"
+                                />
+                                <select name="periode" class="form-control" name="periode">
+                                    <option value="">Pilih Periode</option>
+                                    {{range .PeriodeAll}}
+                                        <option value="{{.IdPeriode}}" {{if eq $.Periode .IdPeriode}}selected{{end}}>{{.NamaPeriode}}</option>
+                                    {{end}}
+                                </select>
+                                <button type="submit" class="btn btn-primary">
+                                    <span class="bi bi-search"></span>
+                                </button>
+                            </form>
+                            <button
+                                class="btn btn-success"
+                                data-bs-toggle="modal"
+                                data-bs-target="#tambah-aktivitas"
+                            >
+                                <span class="bi bi-database-add"></span>
+                            </button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-lg">
+                                <thead>
+                                    <tr>
+                                        <th>No</th>
+                                        <th>Tanggal</th>
+                                        <th>Tupoksi</th>
+                                        <th>Deskripsi</th>
+                                        <th>Catatan</th>
+                                        <th>Status</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {{range $i, $aktivitas := .Result}}
+                                    <tr>
+                                        <td class="text-bold-500">{{add (add $i 1) $.Offset}}</td>
+                                        <td class="text-bold-500">
+                                            {{$aktivitas.Tanggal}}
+                                        </td>
+                                        <td class="text-bold-500">
+                                            {{$aktivitas.Nama}}
+                                        </td>
+                                        <td class="text-bold-500">
+                                            {{$aktivitas.Deskripsi}}
+                                        </td>
+                                        <td class="text-bold-500">
+                                            {{$aktivitas.Catatan}}
+                                        </td>
+                                        <td class="text-bold-500">
+                                            {{$aktivitas.Status}}
+                                        </td>
+                                        <td class="text-bold-500">
+                                            {{if eq $aktivitas.Status "Dalam Pengerjaan"}}
+                                                <a href="/dashboard/aktivitas/{{$aktivitas.Id}}/selesai" class="btn btn-success">
+                                                    <span class="bi bi-check"></span>
+                                                </a>
+                                            {{end}}
+                                            <a href="/dashboard/aktivitas/{{$aktivitas.Id}}" class="btn btn-success">
+                                                <span class="bi bi-eye"></span>
+                                            </a>
+                                            <button class="btn btn-primary" onClick="edit('{{$aktivitas.Id}}', '{{$aktivitas.IdTupoksi}}', '{{$aktivitas.Catatan}}', '{{$aktivitas.Mulai}}', '{{$aktivitas.Selesai}}')">
+                                                <span class="bi bi-pen"></span>
+                                            </button>
+                                            <button class="btn btn-danger" onClick="hapus('{{$aktivitas.Id}}')">
+                                                <span
+                                                    class="bi bi-trash"
+                                                ></span>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {{end}}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="d-flex justify-content-center gap-1">
+                            {{if lte .Page 1}} {{else}}
+                            <a
+                                class="btn btn-secondary"
+                                href="/dashboard/aktivitas?q={{.Query}}&page={{.Previous}}"
+                                >Previous</a
+                            >
+                            {{end}}
+                            <button class="btn btn-primary">{{.Page}}</button>
+                            {{if .HasNext}}
+                            <a
+                                class="btn btn-secondary"
+                                href="/dashboard/aktivitas?q={{.Query}}&page={{.Next}}"
+                                >Next</a
+                            >
+                            {{end}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="tambah-aktivitas">
+        <div class="modal-dialog" role="document">
+            <form action="/dashboard/aktivitas/post" method="post" enctype="multipart/form-data">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5">Tambah Aktivitas</h1>
+                        <button
+                            type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"
+                        ></button>
+                    </div>
+                    <div class="modal-body">
+                        <label for="select-tupoksi" class="form-label"
+                            >Tupoksi</label
+                        >
+                        <select
+                            id="select-tupoksi"
+                            class="form-control mb-2"
+                            name="tupoksi"
+                        >
+                            {{range .TupoksiAll}}
+                            <option value="{{.Id}}">{{.Nama}}</option>
+                            {{end}}
+                        </select>
+                        <label for="catatan" class="form-label">Catatan</label>
+                        <textarea
+                            rows="10"
+                            class="form-control mb-2"
+                            id="catatan"
+                            name="catatan"
+                        ></textarea>
+                        <label for="start-date" class="form-label">Waktu mulai (opsional)</label>
+                        <input class="form-control mb-2" type="datetime-local" name="startdate" id="start-date">
+                        <label for="start-date" class="form-label">Waktu selesai (opsional)</label>
+                        <input class="form-control mb-2" type="datetime-local" name="enddate" id="end-date">
+                        <label for="start-date" class="file">Bukti aktivitas (opsional)</label>
+                        <input class="form-control mb-2" type="file" name="file" id="file" multiple>
+                    </div>
+                    <div class="modal-footer">
+                        <button
+                            type="button"
+                            class="btn btn-danger"
+                            data-bs-dismiss="modal"
+                        >
+                            Batal
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            Simpan
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="modal fade" id="hapus-aktivitas">
+        <div class="modal-dialog" role="document">
+            <form action="/dashboard/aktivitas/delete" method="post">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5">Hapus Aktivitas</h1>
+                        <button
+                            type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"
+                        ></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="id_aktivitas" id="hapus-aktivitas-id">
+                        <h6>Yakin ingin menghapus aktivitas ini ?</h6>
+                    </div>
+                    <div class="modal-footer">
+                        <button
+                            type="button"
+                            class="btn btn-danger"
+                            data-bs-dismiss="modal"
+                        >
+                            Batal
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            Lanjut
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="modal fade" id="edit-aktivitas">
+        <div class="modal-dialog" role="document">
+            <form action="/dashboard/aktivitas/update" method="post">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5">Edit Aktivitas</h1>
+                        <button
+                            type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"
+                        ></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="id_aktivitas" id="id-aktivitas">
+                        <label for="select-tupoksi" class="form-label"
+                            >Tupoksi</label
+                        >
+                        <select
+                            id="edit-select-tupoksi"
+                            class="form-control mb-2"
+                            name="tupoksi"
+                        >
+                            {{range .TupoksiAll}}
+                            <option value="{{.Id}}">{{.Nama}}</option>
+                            {{end}}
+                        </select>
+                        <label for="catatan" class="form-label">Catatan</label>
+                        <textarea
+                            rows="10"
+                            class="form-control mb-2"
+                            id="edit-catatan"
+                            name="catatan"
+                        ></textarea>
+                        <label for="start-date" class="form-label">Waktu mulai (opsional)</label>
+                        <input class="form-control mb-2" type="datetime-local" name="startdate" id="edit-start-date">
+                        <label for="start-date" class="form-label">Waktu selesai (opsional)</label>
+                        <input class="form-control mb-2" type="datetime-local" name="enddate" id="edit-end-date">
+                    </div>
+                    <div class="modal-footer">
+                        <button
+                            type="button"
+                            class="btn btn-danger"
+                            data-bs-dismiss="modal"
+                        >
+                            Batal
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            Simpan
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script type="text/javascript">
+        function edit(idAktivitas, idTupoksi, catatan, startDate, endDate){
+            let options = document.getElementById("edit-select-tupoksi").getElementsByTagName("option");
+
+            for(let i = 0; i < options.length; i++){
+                options[i].removeAttribute("selected")
+                if(options[i].value == idTupoksi) {
+                    options[i].toggleAttribute("selected")
+                }
+            }
+
+            document.getElementById("id-aktivitas").value = idAktivitas;
+            document.getElementById("edit-catatan").innerHTML = catatan
+            document.getElementById("edit-start-date").value = startDate
+            document.getElementById("edit-end-date").value = endDate
+
+            const modal = new bootstrap.Modal(document.getElementById("edit-aktivitas"))
+            modal.show()
+        }
+
+        function hapus(id){
+            document.getElementById("hapus-aktivitas-id").value = id
+            const modal = new bootstrap.Modal(document.getElementById("hapus-aktivitas"))
+            modal.show()
+        }
+    </script>
+</section>

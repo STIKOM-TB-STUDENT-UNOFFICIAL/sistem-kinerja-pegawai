@@ -1,0 +1,70 @@
+<section class="section">
+    <div class="row">
+        <div class="col-12 col-md-6">
+            <div class="card">
+                <div
+                    class="card-body px-4 py-4 d-flex align-items-center gap-3"
+                >
+                    <div
+                        class="rounded-circle bg-primary position-relative"
+                        style="width: 56px; height: 56px; flex-shrink: 0"
+                    >
+                        <i
+                            class="bi bi-people text-white position-absolute top-50 start-50 translate-middle"
+                            style="font-size: 1rem; line-height: 0"
+                        ></i>
+                    </div>
+                    <div>
+                        <p class="text-muted mb-1" style="font-size: 0.875rem">
+                            Total Pengguna
+                        </p>
+                        <h2 class="mb-0 fw-bold">{{.TotalPengguna}}</h2>
+                        <small class="text-muted">pengguna terdaftar</small>
+                    </div>
+                </div>
+                <div class="card-footer px-4 py-2">
+                    <a
+                        href="/dashboard/admin/pengguna"
+                        class="text-decoration-none text-primary"
+                        style="font-size: 0.875rem"
+                    >
+                        Kelola pengguna <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6">
+            <div class="card">
+                <div
+                    class="card-body px-4 py-4 d-flex align-items-center gap-3"
+                >
+                    <div
+                        class="rounded-circle bg-warning position-relative"
+                        style="width: 56px; height: 56px; flex-shrink: 0"
+                    >
+                        <i
+                            class="bi bi-hourglass text-white position-absolute top-50 start-50 translate-middle"
+                            style="font-size: 1rem; line-height: 0"
+                        ></i>
+                    </div>
+                    <div>
+                        <p class="text-muted mb-1" style="font-size: 0.875rem">
+                            Total Periode
+                        </p>
+                        <h2 class="mb-0 fw-bold">{{.TotalPeriode}}</h2>
+                        <small class="text-muted">periode aktif</small>
+                    </div>
+                </div>
+                <div class="card-footer px-4 py-2">
+                    <a
+                        href="/dashboard/admin/periode"
+                        class="text-decoration-none text-warning"
+                        style="font-size: 0.875rem"
+                    >
+                        Kelola periode <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

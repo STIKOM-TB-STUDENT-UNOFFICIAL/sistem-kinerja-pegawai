@@ -1,0 +1,79 @@
+<section class="section">
+    <div class="row">
+        <div class="col">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">Daftar Anggota</h4>
+                </div>
+                <div class="card-content">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <form
+                                action="/dashboard/anggota"
+                                class="d-flex gap-1"
+                            >
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    placeholder="Cari"
+                                    name="q"
+                                />
+                                <input
+                                    type="hidden"
+                                    name="page"
+                                    value="{{.Page}}"
+                                />
+                                <button type="submit" class="btn btn-primary">
+                                    <span class="bi bi-search"></span>
+                                </button>
+                            </form>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-lg">
+                                <thead>
+                                    <tr>
+                                        <th>No</th>
+                                        <th>Nama</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {{range $i, $anggota := .Result}}
+                                    <tr>
+                                        <td class="text-bold-500">{{add (add $i 1) $.Offset}}</td>
+                                        <td class="text-bold-500">
+                                            {{$anggota.Nama}}
+                                        </td>
+                                        <td class="text-bold-500">
+                                            <a href="/dashboard/anggota/{{$anggota.UserId}}" class="btn btn-success">
+                                                <span class="bi bi-eye"></span>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {{end}}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="d-flex justify-content-center gap-1">
+                            {{if lte .Page 1}} {{else}}
+                            <a
+                                class="btn btn-secondary"
+                                href="/dashboard/anggota?q={{.Query}}&page={{.Previous}}"
+                                >Previous</a
+                            >
+                            {{end}}
+                            <button class="btn btn-primary">{{.Page}}</button>
+                            {{if .HasNext}}
+                            <a
+                                class="btn btn-secondary"
+                                href="/dashboard/anggota?q={{.Query}}&page={{.Next}}"
+                                >Next</a
+                            >
+                            {{end}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

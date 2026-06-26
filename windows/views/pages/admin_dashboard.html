@@ -1,0 +1,189 @@
+<section class="section">
+    <div class="row">
+        <div class="col">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">Daftar Pengguna dan Anggota</h4>
+                </div>
+                <div class="card-content">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <form
+                                action="/dashboard/admin/anggota"
+                                class="d-flex gap-1"
+                            >
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    placeholder="Cari"
+                                    name="q"
+                                />
+                                <input
+                                    type="hidden"
+                                    name="page"
+                                    value="{{.Page}}"
+                                />
+                                <button type="submit" class="btn btn-primary">
+                                    <span class="bi bi-search"></span>
+                                </button>
+                            </form>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-lg">
+                                <thead>
+                                    <tr>
+                                        <th>No</th>
+                                        <th>Atasan</th>
+                                        <th>Anggota</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {{range $i, $atasan := .Parent}}
+                                    <tr>
+                                        <td class="text-bold-500">{{add (add $i 1) $.Offset}}</td>
+                                        <td class="text-bold-500">
+                                            {{$atasan.Nama}}
+                                        </td>
+                                        <td class="text-bold-500">
+                                            <table>
+                                                <tbody>
+                                                    {{range $j, $bawahan := $.Children}}
+                                                        {{if eq $bawahan.ParentUserId $atasan.UserId}}
+                                                            <tr>
+                                                                <td> - {{$bawahan.ChildrenName}}</td>
+                                                                <td><button class="btn btn-danger" onClick="hapus('{{$bawahan.Id}}')">Hapus</button></td>
+                                                            </tr>
+                                                        {{end}}
+                                                    {{end}}
+                                                </tbody>
+                                            </table>
+                                            <button 
+                                                class="btn btn-success"
+                                                onClick="tambah('{{$atasan.UserId}}', '{{$atasan.Nama}}')"
+                                            >Tambah</button>
+                                        </td>
+                                    </tr>
+                                    {{end}}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="d-flex justify-content-center gap-1">
+                            {{if lte .Page 1}} {{else}}
+                            <a
+                                class="btn btn-secondary"
+                                href="/dashboard/admin/anggota?q={{.Query}}&page={{.Previous}}"
+                                >Previous</a
+                            >
+                            {{end}}
+                            <button class="btn btn-primary">{{.Page}}</button>
+                            {{if .HasNext}}
+                            <a
+                                class="btn btn-secondary"
+                                href="/dashboard/admin/anggota?q={{.Query}}&page={{.Next}}"
+                                >Next</a
+                            >
+                            {{end}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="tambah-anggota">
+        <div class="modal-dialog" role="document">
+            <form action="/dashboard/admin/anggota/post" method="post">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="title-p">Tambah Anggota</h1>
+                        <button
+                            type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"
+                        ></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="parent_id" id="parent-id">
+                        <input type="hidden" name="query" value="{{.Query}}">
+                        <input type="hidden" name="page" value="{{.Page}}">
+                        <label for="select-anggota" class="form-label"
+                            >Anggota</label
+                        >
+                        <select
+                            id="select-anggota"
+                            class="form-control mb-1"
+                            name="children_id"
+                        >
+                            {{range .AllParent}}
+                                <option value="{{.UserId}}">{{.Nama}}</option>
+                            {{end}}
+                        </select>
+                    </div>
+                    <div class="modal-footer">
+                        <button
+                            type="button"
+                            class="btn btn-danger"
+                            data-bs-dismiss="modal"
+                        >
+                            Batal
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            Simpan
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="modal fade" id="hapus-anggota">
+        <div class="modal-dialog" role="document">
+            <form action="/dashboard/admin/anggota/delete" method="post">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5">Hapus Anggota</h1>
+                        <button
+                            type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"
+                        ></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="id_aktivitas" id="hapus-aktivitas-id">
+                        <h6>Yakin ingin menghapus anggota ini ?</h6>
+                        <input type="hidden" name="query" value="{{.Query}}">
+                        <input type="hidden" name="page" value="{{.Page}}">
+                        <input type="hidden" name="anggota_id" value="{{.Query}}" id="anggota-id">
+                    </div>
+                    <div class="modal-footer">
+                        <button
+                            type="button"
+                            class="btn btn-danger"
+                            data-bs-dismiss="modal"
+                        >
+                            Batal
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            Lanjut
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script type="text/javascript">
+        function tambah(parentId, parentName){
+            document.getElementById("parent-id").value = parentId;
+            document.getElementById("title-p").innerHTML = `Tambah anggota untuk ${parentName}`
+
+            const modal = new bootstrap.Modal(document.getElementById("tambah-anggota"))
+            modal.show()
+        }
+
+        function hapus(id){
+            document.getElementById("anggota-id").value = id
+            const modal = new bootstrap.Modal(document.getElementById("hapus-anggota"))
+            modal.show()
+        }
+    </script>
+</section>
