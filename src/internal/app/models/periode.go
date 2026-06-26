@@ -101,30 +101,6 @@ func (pm *PeriodeModel) Count(q string) int {
 	return result
 }
 
-func (pm *PeriodeModel) Insert(nama, startDate, endDate string) {
-	_, err := pm.db.Query("INSERT INTO periode (id, nama_periode, start_date, end_date) VALUES (NULL, ?, ?, ?)", nama, startDate, endDate)
-
-	if err != nil {
-		utils.Log(err.Error())
-	}
-}
-
-func (pm *PeriodeModel) Update(id, nama, startDate, endDate string) {
-	_, err := pm.db.Query("UPDATE periode SET nama_periode = ?, start_date = ?, end_date = ? WHERE id = ?", nama, startDate, endDate, id)
-
-	if err != nil {
-		utils.Log(err.Error())
-	}
-}
-
-func (pm *PeriodeModel) Delete(id string) {
-	_, err := pm.db.Query("DELETE FROM periode WHERE id = ?", id)
-
-	if err != nil {
-		utils.Log(err.Error())
-	}
-}
-
 func (pm *PeriodeModel) FindById(id string) *PeriodeDB {
 	var temp PeriodeDB
 	err := pm.db.QueryRow("SELECT id, nama_periode, start_date, end_date FROM periode WHERE id = ?", id).Scan(
