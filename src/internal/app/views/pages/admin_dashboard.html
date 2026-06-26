@@ -1,4 +1,5 @@
 <section class="section">
+
     <div class="row">
         <div class="col">
             <div class="card">
@@ -172,6 +173,15 @@
         </div>
     </div>
     <script type="text/javascript">
+        $(document).ready(function() {
+            $('#tambah-anggota').on('shown.bs.modal', function () {
+                $('#select-anggota').chosen('destroy').chosen({
+                    no_results_text: "Tidak ditemukan anggota: ",
+                    width: '100%'
+                });
+            });
+        });
+
         function tambah(parentId, parentName){
             document.getElementById("parent-id").value = parentId;
             document.getElementById("title-p").innerHTML = `Tambah anggota untuk ${parentName}`

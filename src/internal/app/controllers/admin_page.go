@@ -15,6 +15,7 @@ type AdminPage struct {
 	periodeModel   *models.PeriodeModel
 	userModel      *models.UserModel
 	aktivitasModel *models.AktivitasModel
+	tupoksiModel   *models.TupoksiModel
 }
 
 func (ap *AdminPage) DashboardAdminRingkasan(ctx fiber.Ctx) error {
@@ -94,11 +95,13 @@ func NewAdminPage(db *sql.DB) *AdminPage {
 	periodeModel := models.NewPeriodeModel(db)
 	userModel := models.NewUserModel(db)
 	aktivitasModel := models.NewAktivitasModel(db)
+	tupoksiModel := models.NewTupoksiModel(db)
 
 	return &AdminPage{
 		anggotaModel:   anggotaModel,
 		periodeModel:   periodeModel,
 		userModel:      userModel,
 		aktivitasModel: aktivitasModel,
+		tupoksiModel:   tupoksiModel,
 	}
 }

@@ -42,6 +42,11 @@ func SetupRoutes(route fiber.Router, db *sql.DB) {
 	admin.Post("/anggota/post", ap.InsertAnggota)
 	admin.Post("/anggota/delete", ap.HapusAnggota)
 
+	admin.Get("/tupoksi", ap.AdminTupoksiPage)
+	admin.Post("/tupoksi/post", ap.AdminPostTupoksi)
+	admin.Post("/tupoksi/update", ap.AdminUpdateTupoksi)
+	admin.Post("/tupoksi/delete", ap.AdminDeleteTupoksi)
+
 	user := route.Group(
 		"/dashboard",
 		middleware.Authentication,
