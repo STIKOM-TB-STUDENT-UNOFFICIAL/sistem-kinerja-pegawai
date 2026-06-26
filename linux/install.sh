@@ -68,13 +68,13 @@ install_dependencies() {
     case $PKG_MANAGER in
         apt)
             apt-get update -qq
-            apt-get install -y -qq mariadb-server apache2 >/dev/null 2>&1
+            apt-get install -y -qq mariadb-server >/dev/null 2>&1
             ;;
         dnf)
-            dnf install -y -q mariadb-server httpd >/dev/null 2>&1
+            dnf install -y -q mariadb-server >/dev/null 2>&1
             ;;
         yum)
-            yum install -y -q mariadb-server httpd >/dev/null 2>&1
+            yum install -y -q mariadb-server >/dev/null 2>&1
             ;;
     esac
 
@@ -83,7 +83,18 @@ install_dependencies() {
 
 # ---------- Setup MariaDB ----------
 setup_database() {
-    step "Mengkonfigurasi database MariaDB..."
+    step "Setup database MariaDB..."
+
+    echo ""
+    read -rp "Apakah ingin sekalian install/import database? [Y/n] " db_confirm
+    db_confirm="${db_confirm:-Y}"
+
+    if [[ ! "$db_confirm" =~ ^[Yy]$ ]]; then
+        warn "Setup database dilewati."
+        warn "Anda perlu mengimport database secara manual."
+        SKIP_DB=true
+        return 0
+    fi
 
     # Pastikan MariaDB berjalan
     systemctl start mariadb 2>/dev/null || systemctl start mysql 2>/dev/null || true
@@ -207,7 +218,7 @@ EOF
 setup_apache() {
     step "Mengkonfigurasi Apache reverse proxy..."
 
-    # Cek apakah Apache (apache2/httpd) tersedia
+    # Cek apakah Apache (apache2/httpd) sudah terinstall
     if command -v a2enmod &>/dev/null; then
         # Debian/Ubuntu — apache2
         a2enmod proxy proxy_http >/dev/null 2>&1
@@ -248,7 +259,9 @@ EOF
 
         info "HTTPD virtual host berhasil dikonfigurasi."
     else
-        warn "Apache/HTTPD tidak terdeteksi. Lewati konfigurasi reverse proxy."
+        warn "Apache/HTTPD tidak terinstall. Lewati konfigurasi reverse proxy."
+        warn "Aplikasi tetap dapat diakses langsung via port (lihat .env)."
+        SKIP_APACHE=true
     fi
 }
 
@@ -268,7 +281,16 @@ print_summary() {
     echo ""
     echo -e "  📁  Direktori instalasi : ${CYAN}${INSTALL_DIR}${NC}"
     echo -e "  🌐  Aplikasi berjalan   : ${CYAN}http://localhost:${APP_PORT}${NC}"
-    echo -e "  🗄️  Database            : ${CYAN}${DB_NAME}${NC}"
+    if [ "$SKIP_DB" = true ]; then
+        echo -e "  🗄️  Database            : ${YELLOW}Dilewati (perlu import manual)${NC}"
+    else
+        echo -e "  🗄️  Database            : ${CYAN}${DB_NAME}${NC}"
+    fi
+    if [ "$SKIP_APACHE" = true ]; then
+        echo -e "  🌐  Apache proxy        : ${YELLOW}Dilewati (Apache tidak terinstall)${NC}"
+    else
+        echo -e "  🌐  Apache proxy        : ${CYAN}Aktif${NC}"
+    fi
     echo -e "  ⚙️  Service             : ${CYAN}${APP_NAME}.service${NC}"
     echo ""
     echo -e "  ${YELLOW}Perintah berguna:${NC}"
@@ -286,13 +308,16 @@ print_banner
 check_root
 detect_pkg_manager
 
+SKIP_DB=false
+SKIP_APACHE=false
+
 echo ""
 echo -e "${YELLOW}Installer akan melakukan:${NC}"
-echo -e "  1. Install MariaDB & Apache2"
-echo -e "  2. Buat & import database"
+echo -e "  1. Install MariaDB"
+echo -e "  2. Buat & import database ${CYAN}(opsional)${NC}"
 echo -e "  3. Install aplikasi ke /opt/${APP_NAME}"
 echo -e "  4. Setup systemd service"
-echo -e "  5. Konfigurasi Apache reverse proxy"
+echo -e "  5. Konfigurasi Apache reverse proxy ${CYAN}(jika Apache terinstall)${NC}"
 echo ""
 read -rp "Lanjutkan instalasi? [Y/n] " confirm
 confirm="${confirm:-Y}"
