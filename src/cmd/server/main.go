@@ -17,6 +17,7 @@ func main() {
 
 	var viewsPath string
 	var reload bool
+	var prefork bool
 
 	if os.Getenv("ENVIRONMENT") == "dev" {
 		viewsPath = "./internal/app/views"
@@ -26,6 +27,12 @@ func main() {
 		reload = false
 	} else {
 		utils.PanicLog("ENVIRONMENT Invalid Value !")
+	}
+
+	if os.Getenv("PREFORK") == "true" {
+		prefork = true
+	} else {
+		prefork = false
 	}
 
 	engine := html.New(viewsPath, ".html")
@@ -64,10 +71,14 @@ func main() {
 
 	system.SetupRoutes(app, db)
 
-	app.Listen(
+	err = app.Listen(
 		fmt.Sprintf("%s:%s", os.Getenv("HOST"), os.Getenv("PORT")),
 		fiber.ListenConfig{
-			EnablePrefork: true,
+			EnablePrefork: prefork,
 		},
 	)
+
+	if err != nil {
+		utils.PanicLog(err.Error())
+	}
 }

@@ -10,7 +10,11 @@ import (
 )
 
 func LoadConfig() {
-	godotenv.Load()
+	err := godotenv.Load()
+
+	if err != nil {
+		utils.PanicLog(err.Error())
+	}
 
 	maxprocs, err := strconv.Atoi(os.Getenv("MAXPROCS"))
 
