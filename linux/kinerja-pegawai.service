@@ -14,6 +14,7 @@ Restart=always
 RestartSec=5
 
 Environment=GIN_MODE=release
+EnvironmentFile=/opt/kinerja-pegawai/.env
 
 [Install]
 WantedBy=multi-user.target
