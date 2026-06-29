@@ -1,4 +1,5 @@
 <section class="section">
+
     <div class="row">
         <div class="col">
             <div class="card">
@@ -263,15 +264,24 @@
         </div>
     </div>
     <script type="text/javascript">
-        function edit(idAktivitas, idTupoksi, catatan, startDate, endDate){
-            let options = document.getElementById("edit-select-tupoksi").getElementsByTagName("option");
+        $(document).ready(function() {
+            $('#tambah-aktivitas').on('shown.bs.modal', function () {
+                $('#select-tupoksi').chosen('destroy').chosen({
+                    no_results_text: "Tidak ditemukan tupoksi: ",
+                    width: '100%'
+                });
+            });
 
-            for(let i = 0; i < options.length; i++){
-                options[i].removeAttribute("selected")
-                if(options[i].value == idTupoksi) {
-                    options[i].toggleAttribute("selected")
-                }
-            }
+            $('#edit-aktivitas').on('shown.bs.modal', function () {
+                $('#edit-select-tupoksi').chosen('destroy').chosen({
+                    no_results_text: "Tidak ditemukan tupoksi: ",
+                    width: '100%'
+                });
+            });
+        });
+
+        function edit(idAktivitas, idTupoksi, catatan, startDate, endDate){
+            $('#edit-select-tupoksi').val(idTupoksi).trigger('chosen:updated');
 
             document.getElementById("id-aktivitas").value = idAktivitas;
             document.getElementById("edit-catatan").innerHTML = catatan
